@@ -3,7 +3,7 @@
 const React = require('react');
 const PropTypes = require('prop-types');
 const classnames = require('classnames');
-const Icon = require('stremio-icons/dom');
+const Icon = require('@stremio/stremio-icons/dom');
 const { AddonDetailsModal, Button, MainNavBars, MetaItem, Image, MetaPreview, Multiselect, ModalDialog, PaginationInput, CONSTANTS, useBinaryState, useProfile } = require('stremio/common');
 const useDiscover = require('./useDiscover');
 const useSelectableInputs = require('./useSelectableInputs');
@@ -111,7 +111,7 @@ const Discover = ({ urlParams, queryParams }) => {
                                     <div className={styles['message-container']}>
                                         <Image className={styles['image']} src={'/images/empty.png'} alt={' '} />
                                         <div className={styles['message-label']}>
-                                            {`Error(${discover.catalog_resource.content.content.type})${typeof discover.catalog_resource.content.content.content === 'string' ? ` - ${discover.catalog_resource.content.content.content}` : ''}`}
+                                            {`Error(${discover.catalog_resource.content.content.type})${typeof discover.catalog_resource.content.content.content.message === 'string' ? ` - ${discover.catalog_resource.content.content.content.message}` : ''}`}
                                         </div>
                                     </div>
                                     :
@@ -158,7 +158,7 @@ const Discover = ({ urlParams, queryParams }) => {
                                 releaseInfo={selectedMetaItem.releaseInfo}
                                 released={selectedMetaItem.released}
                                 description={selectedMetaItem.description}
-                                trailer={selectedMetaItem.trailer}
+                                trailers={selectedMetaItem.trailers}
                             />
                             :
                             <div className={styles['meta-preview-container']} />

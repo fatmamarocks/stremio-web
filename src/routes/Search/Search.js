@@ -3,7 +3,7 @@
 const React = require('react');
 const PropTypes = require('prop-types');
 const classnames = require('classnames');
-const Icon = require('stremio-icons/dom');
+const Icon = require('@stremio/stremio-icons/dom');
 const { Image, MainNavBars, MetaRow, MetaItem, useDeepEqualMemo } = require('stremio/common');
 const useSearch = require('./useSearch');
 const styles = require('./styles');
@@ -68,7 +68,7 @@ const Search = ({ queryParams }) => {
                                         );
                                     }
                                     case 'Err': {
-                                        const message = `Error(${catalog_resource.content.content.type})${typeof catalog_resource.content.content.content === 'string' ? ` - ${catalog_resource.content.content.content}` : ''}`;
+                                        const message = `Error(${catalog_resource.content.content.type})${typeof catalog_resource.content.content.content.message === 'string' ? ` - ${catalog_resource.content.content.content.message}` : ''}`;
                                         return (
                                             <MetaRow
                                                 key={index}

@@ -42,7 +42,7 @@ const mapDiscoverState = (discover) => {
                     releaseInfo: metaItem.releaseInfo,
                     released: new Date(metaItem.released),
                     description: metaItem.description,
-                    trailer: metaItem.trailer,
+                    trailers: metaItem.trailers,
                     deepLinks: deepLinking.withMetaItem({ metaItem })
                 }))
             }
@@ -90,7 +90,7 @@ const useDiscover = (urlParams, queryParams) => {
                 }
             };
         } else {
-            const discover = core.getState('discover');
+            const discover = core.transport.getState('discover');
             if (discover.selectable.types.length > 0) {
                 return {
                     action: 'Load',

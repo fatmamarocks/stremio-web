@@ -1,39 +1,51 @@
 // Copyright (C) 2017-2020 Smart code 203358507
 
-function KeyboardNavigation() {
+const EventEmitter = require('events');
+
+function KeyboardShortcuts() {
     let active = false;
 
+    const events = new EventEmitter();
+    events.on('error', () => { });
+
     function onKeyDown(event) {
-        if (event.keyboardNavigationPrevented || event.target.tagName === 'INPUT') {
+        if (event.keyboardShortcutPrevented || event.target.tagName === 'INPUT') {
             return;
         }
 
         switch (event.code) {
             case 'Digit0': {
+                event.preventDefault();
                 window.location = '#/search';
                 break;
             }
             case 'Digit1': {
+                event.preventDefault();
                 window.location = '#/';
                 break;
             }
             case 'Digit2': {
+                event.preventDefault();
                 window.location = '#/discover';
                 break;
             }
             case 'Digit3': {
+                event.preventDefault();
                 window.location = '#/library';
                 break;
             }
             case 'Digit4': {
+                event.preventDefault();
                 window.location = '#/settings';
                 break;
             }
             case 'Digit5': {
+                event.preventDefault();
                 window.location = '#/addons';
                 break;
             }
             case 'Backspace': {
+                event.preventDefault();
                 if (event.ctrlKey) {
                     window.history.forward();
                 } else {
@@ -43,6 +55,7 @@ function KeyboardNavigation() {
                 break;
             }
             case 'KeyF': {
+                event.preventDefault();
                 if (document.fullscreenElement === document.documentElement) {
                     document.exitFullscreen();
                 } else {
@@ -53,17 +66,8 @@ function KeyboardNavigation() {
             }
         }
     }
-    function start() {
-        if (active) {
-            return;
-        }
-
-        window.addEventListener('keydown', onKeyDown);
-        active = true;
-    }
-    function stop() {
-        window.removeEventListener('keydown', onKeyDown);
-        active = false;
+    function onStateChanged() {
+        events.emit('stateChanged');
     }
 
     Object.defineProperties(this, {
@@ -76,10 +80,20 @@ function KeyboardNavigation() {
         }
     });
 
-    this.start = start;
-    this.stop = stop;
+    this.start = function() {
+        if (active) {
+            return;
+        }
 
-    Object.freeze(this);
+        window.addEventListener('keydown', onKeyDown);
+        active = true;
+        onStateChanged();
+    };
+    this.stop = function() {
+        window.removeEventListener('keydown', onKeyDown);
+        active = false;
+        onStateChanged();
+    };
 }
 
-module.exports = KeyboardNavigation;
+module.exports = KeyboardShortcuts;

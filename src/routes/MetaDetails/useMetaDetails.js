@@ -1,7 +1,7 @@
 // Copyright (C) 2017-2020 Smart code 203358507
 
 const React = require('react');
-const { deepLinking, useModelState } = require('stremio/common');
+const { CONSTANTS, deepLinking, useModelState } = require('stremio/common');
 
 const initMetaDetailsState = () => ({
     selected: null,
@@ -9,7 +9,7 @@ const initMetaDetailsState = () => ({
     streams_resources: []
 });
 
-const mapMetaDetailsState = (meta_details) => {
+const mapMetaDetailsStateWithCtx = (meta_details, ctx) => {
     const selected = meta_details.selected;
     const meta_resources = meta_details.meta_resources.map((meta_resource) => {
         return meta_resource.content.type === 'Ready' ?
@@ -33,15 +33,24 @@ const mapMetaDetailsState = (meta_details) => {
                                     :
                                     NaN
                             ),
+                            upcoming: Date.parse(video.released) > Date.now(),
                             // TODO add watched and progress
                             deepLinks: deepLinking.withVideo({
                                 video,
                                 metaTransportUrl: meta_resource.request.base,
                                 metaItem: meta_resource.content.content
                             })
-                        }))
+                        })),
+                        metaExtensions: meta_resource.content.content.links.filter((link) => link.category === CONSTANTS.META_LINK_CATEGORY)
                     }
-                }
+                },
+                addon: ctx.profile.addons.reduce((result, addon) => {
+                    if (addon.transportUrl === meta_resource.request.base) {
+                        return addon;
+                    }
+
+                    return result;
+                }, null)
             }
             :
             meta_resource;
@@ -114,7 +123,7 @@ const useMetaDetails = (urlParams) => {
     return useModelState({
         model: 'meta_details',
         action: loadMetaDetailsAction,
-        map: mapMetaDetailsState,
+        mapWithCtx: mapMetaDetailsStateWithCtx,
         init: initMetaDetailsState
     });
 };

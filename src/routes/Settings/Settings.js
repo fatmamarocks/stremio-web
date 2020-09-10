@@ -3,11 +3,10 @@
 const React = require('react');
 const classnames = require('classnames');
 const throttle = require('lodash.throttle');
-const Icon = require('stremio-icons/dom');
+const Icon = require('@stremio/stremio-icons/dom');
 const { useRouteFocused } = require('stremio-router');
 const { useServices } = require('stremio/services');
-const { Button, Checkbox, MainNavBars, Multiselect, ColorInput, useProfile } = require('stremio/common');
-const useStreamingServer = require('./useStreamingServer');
+const { Button, Checkbox, MainNavBars, Multiselect, ColorInput, TextInput, ModalDialog, useProfile, useStreamingServer, useBinaryState } = require('stremio/common');
 const useProfileSettingsInputs = require('./useProfileSettingsInputs');
 const useStreamingServerSettingsInputs = require('./useStreamingServerSettingsInputs');
 const styles = require('./styles');
@@ -31,14 +30,38 @@ const Settings = () => {
         bingeWatchingCheckbox,
         playInBackgroundCheckbox,
         playInExternalPlayerCheckbox,
-        hardwareDecodingCheckbox
+        hardwareDecodingCheckbox,
+        streamingServerUrlInput
     } = useProfileSettingsInputs(profile);
     const {
         cacheSizeSelect,
         torrentProfileSelect
     } = useStreamingServerSettingsInputs(streamingServer);
+    const [configureServerUrlModalOpen, openConfigureServerUrlModal, closeConfigureServerUrlModal] = useBinaryState(false);
+    const configureServerUrlInputRef = React.useRef(null);
+    const configureServerUrlOnSubmit = React.useCallback(() => {
+        streamingServerUrlInput.onChange(configureServerUrlInputRef.current.value);
+        closeConfigureServerUrlModal();
+    }, [streamingServerUrlInput]);
+    const configureServerUrlModalButtons = React.useMemo(() => {
+        return [
+            {
+                className: styles['cancel-button'],
+                label: 'Cancel',
+                props: {
+                    onClick: closeConfigureServerUrlModal
+                }
+            },
+            {
+                label: 'Submit',
+                props: {
+                    onClick: configureServerUrlOnSubmit,
+                }
+            }
+        ];
+    }, [configureServerUrlOnSubmit]);
     const logoutButtonOnClick = React.useCallback(() => {
-        core.dispatch({
+        core.transport.dispatch({
             action: 'Ctx',
             args: {
                 action: 'Logout'
@@ -58,7 +81,7 @@ const Settings = () => {
         // TODO
     }, []);
     const reloadStreamingServer = React.useCallback(() => {
-        core.dispatch({
+        core.transport.dispatch({
             action: 'StreamingServer',
             args: {
                 action: 'Reload'
@@ -103,6 +126,7 @@ const Settings = () => {
         if (routeFocused) {
             updateSelectedSectionId();
         }
+        closeConfigureServerUrlModal();
     }, [routeFocused]);
     return (
         <MainNavBars className={styles['settings-container']} route={'settings'}>
@@ -354,10 +378,11 @@ const Settings = () => {
                             <div className={styles['option-name-container']}>
                                 <div className={styles['label']}>Url</div>
                             </div>
-                            <div className={classnames(styles['option-input-container'], styles['info-container'], styles['selectable'])}>
-                                <div className={styles['label']}>
-                                    {profile.settings.streaming_server_url}
-                                </div>
+                            <div className={classnames(styles['option-input-container'], styles['configure-input-container'])}>
+                                <div className={styles['label']} title={streamingServerUrlInput.value}>{streamingServerUrlInput.value}</div>
+                                <Button className={styles['configure-button-container']} title={'Configure server url'} onClick={openConfigureServerUrlModal}>
+                                    <Icon className={styles['icon']} icon={'ic_settings'} />
+                                </Button>
                             </div>
                         </div>
                         {
@@ -391,6 +416,25 @@ const Settings = () => {
                     </div>
                 </div>
             </div>
+            {
+                configureServerUrlModalOpen ?
+                    <ModalDialog
+                        className={styles['configure-server-url-modal-container']}
+                        title={'Configure streaming server url'}
+                        buttons={configureServerUrlModalButtons}
+                        onCloseRequest={closeConfigureServerUrlModal}>
+                        <TextInput
+                            ref={configureServerUrlInputRef}
+                            className={styles['server-url-input']}
+                            type={'text'}
+                            defaultValue={streamingServerUrlInput.value}
+                            placeholder={'Enter a streaming server url'}
+                            onSubmit={configureServerUrlOnSubmit}
+                        />
+                    </ModalDialog>
+                    :
+                    null
+            }
         </MainNavBars>
     );
 };
